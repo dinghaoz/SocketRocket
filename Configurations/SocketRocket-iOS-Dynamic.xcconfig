@@ -15,3 +15,6 @@ PRODUCT_BUNDLE_IDENTIFIER = com.facebook.socketrocket.ios
 IPHONEOS_DEPLOYMENT_TARGET = 8.0
 
 INFOPLIST_FILE = $(SRCROOT)/SocketRocket/Resources/Info.plist
+
+ENABLE_BITCODE = NO
+

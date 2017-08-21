@@ -18,3 +18,5 @@ INFOPLIST_FILE = $(SRCROOT)/SocketRocket/Resources/Info.plist
 
 OTHER_CFLAGS[sdk=iphoneos9.*] = $(inherited) -fembed-bitcode
 OTHER_LDFLAGS = $(inherited) -Licucore
+
+ENABLE_BITCODE = NO
