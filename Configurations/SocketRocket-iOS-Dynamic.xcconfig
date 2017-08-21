@@ -18,3 +18,5 @@ INFOPLIST_FILE = $(SRCROOT)/SocketRocket/Resources/Info.plist
 
 ENABLE_BITCODE = NO
 
+CURRENT_PROJECT_VERSION = 0.5.3
+

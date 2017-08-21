@@ -20,3 +20,5 @@ OTHER_CFLAGS[sdk=iphoneos9.*] = $(inherited) -fembed-bitcode
 OTHER_LDFLAGS = $(inherited) -Licucore
 
 ENABLE_BITCODE = NO
+
+CURRENT_PROJECT_VERSION = 0.5.3
