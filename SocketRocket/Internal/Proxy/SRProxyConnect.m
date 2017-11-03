@@ -17,9 +17,9 @@
 
 @interface SRProxyConnect() <NSStreamDelegate>
 
-@property (nonatomic, strong) NSURL *url;
-@property (nonatomic, strong) NSInputStream *inputStream;
-@property (nonatomic, strong) NSOutputStream *outputStream;
+@property (atomic, strong) NSURL *url;
+@property (atomic, strong) NSInputStream *inputStream;
+@property (atomic, strong) NSOutputStream *outputStream;
 
 @end
 
