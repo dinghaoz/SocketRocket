@@ -80,6 +80,7 @@ NSString *const SRHTTPResponseErrorKey = @"HTTPResponseStatusCode";
 @property (nonatomic, assign, readwrite) BOOL allowsUntrustedSSLCertificates;
 
 @property (nonatomic, strong, readonly) SRDelegateController *delegateController;
+@property (atomic, strong) SRProxyConnect *proxyConnect; // proxy support
 
 @end
 
@@ -135,9 +136,6 @@ NSString *const SRHTTPResponseErrorKey = @"HTTPResponseStatusCode";
 
     NSArray<NSString *> *_requestedProtocols;
     SRIOConsumerPool *_consumerPool;
-
-    // proxy support
-    SRProxyConnect *_proxyConnect;
 }
 
 @synthesize readyState = _readyState;
@@ -316,10 +314,10 @@ NSString *const SRHTTPResponseErrorKey = @"HTTPResponseStatusCode";
         });
     }
 
-    _proxyConnect = [[SRProxyConnect alloc] initWithURL:_url];
+    self.proxyConnect = [[SRProxyConnect alloc] initWithURL:_url];
 
     __weak typeof(self) wself = self;
-    [_proxyConnect openNetworkStreamWithCompletion:^(NSError *error, NSInputStream *readStream, NSOutputStream *writeStream) {
+    [self.proxyConnect openNetworkStreamWithCompletion:^(NSError *error, NSInputStream *readStream, NSOutputStream *writeStream) {
         [wself _connectionDoneWithError:error readStream:readStream writeStream:writeStream];
     }];
 }
@@ -351,7 +349,7 @@ NSString *const SRHTTPResponseErrorKey = @"HTTPResponseStatusCode";
     // Schedule to run on a work queue, to make sure we don't run this inline and deallocate `self` inside `SRProxyConnect`.
     // TODO: (nlutsenko) Find a better structure for this, maybe Bolts Tasks?
     dispatch_async(_workQueue, ^{
-        _proxyConnect = nil;
+        self.proxyConnect = nil;
     });
 }
 
