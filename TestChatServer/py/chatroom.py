@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 #
 # Copyright 2012 Square Inc.
 # Portions Copyright (c) 2016-present, Facebook, Inc.
