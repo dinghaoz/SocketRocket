@@ -99,9 +99,11 @@
             [self.outputStream setProperty:self.url.host forKey:@"_kCFStreamPropertySocketPeerName"];
         }
     }
-    if (_receivedHTTPHeaders) {
-        CFRelease(_receivedHTTPHeaders);
-        _receivedHTTPHeaders = NULL;
+    @synchronized(self) {
+        if (_receivedHTTPHeaders) {
+            CFRelease(_receivedHTTPHeaders);
+            _receivedHTTPHeaders = NULL;
+        }
     }
 
     NSInputStream *inputStream = self.inputStream;
@@ -124,9 +126,11 @@
         error = SRHTTPErrorWithCodeDescription(500, 2132,@"Proxy Error");
     }
 
-    if (_receivedHTTPHeaders) {
-        CFRelease(_receivedHTTPHeaders);
-        _receivedHTTPHeaders = NULL;
+    @synchronized(self) {
+        if (_receivedHTTPHeaders) {
+            CFRelease(_receivedHTTPHeaders);
+            _receivedHTTPHeaders = NULL;
+        }
     }
 
     self.inputStream.delegate = nil;
@@ -418,8 +422,10 @@
 //handle checking the proxy  connection status
 - (BOOL)_proxyProcessHTTPResponseWithData:(NSData *)data
 {
-    if (_receivedHTTPHeaders == NULL) {
-        _receivedHTTPHeaders = CFHTTPMessageCreateEmpty(NULL, NO);
+    @synchronized(self) {
+        if (_receivedHTTPHeaders == NULL) {
+            _receivedHTTPHeaders = CFHTTPMessageCreateEmpty(NULL, NO);
+        }
     }
 
     CFHTTPMessageAppendBytes(_receivedHTTPHeaders, (const UInt8 *)data.bytes, data.length);
