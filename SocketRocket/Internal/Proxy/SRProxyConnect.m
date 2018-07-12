@@ -17,80 +17,39 @@
 #import <objc/runtime.h>
 
 
-@interface SRWeakProxy<__covariant ObjectType> : NSProxy
 
-+ (id)weakProxyForObject:(ObjectType)targetObject;
-@property (nonatomic, weak, readonly, nullable) ObjectType target;
+@interface SRNSStreamSafeDelegate : NSObject<NSStreamDelegate>
 
 @end
 
-@interface SRWeakProxy ()
-
-@property (nonatomic, weak, readwrite) id target;
-
+@interface SRNSStreamSafeDelegate ()
+@property (atomic, weak, readonly) id<NSStreamDelegate> target;
 @end
 
 
-@implementation SRWeakProxy
-
-#pragma mark Life Cycle
-
-// This is the designated creation method of an `SRWeakProxy` and
-// as a subclass of `NSProxy` it doesn't respond to or need `-init`.
-+ (id)weakProxyForObject:(id)targetObject
+@implementation SRNSStreamSafeDelegate
+- (instancetype)initWithDelegate:(id<NSStreamDelegate>)delegate
 {
-    SRWeakProxy *weakProxy = [self alloc];
-    weakProxy.target = targetObject;
-    return weakProxy;
+    if ((self = [super init])) {
+        _target = delegate;
+    }
+    
+    return self;
 }
 
-- (NSString*)description
+- (void)stream:(NSStream *)aStream handleEvent:(NSStreamEvent)eventCode
 {
-    return [NSString stringWithFormat:@"%@: target=%@", NSStringFromClass([self class]), _target];
+    [_target stream:aStream handleEvent:eventCode];
 }
-
-#pragma mark Forwarding Messages
-
-- (id)forwardingTargetForSelector:(SEL)selector
-{
-    // Keep it lightweight: access the ivar directly
-    return _target;
-}
-
-
-#pragma mark - NSWeakProxy Method Overrides
-#pragma mark Handling Unimplemented Methods
-
-- (void)forwardInvocation:(NSInvocation *)invocation
-{
-    // Fallback for when target is nil. Don't do anything, just return 0/NULL/nil.
-    // The method signature we've received to get here is just a dummy to keep `doesNotRecognizeSelector:` from firing.
-    // We can't really handle struct return types here because we don't know the length.
-    void *nullPointer = NULL;
-    [invocation setReturnValue:&nullPointer];
-}
-
-
-- (NSMethodSignature *)methodSignatureForSelector:(SEL)selector
-{
-    // We only get here if `forwardingTargetForSelector:` returns nil.
-    // In that case, our weak target has been reclaimed. Return a dummy method signature to keep `doesNotRecognizeSelector:` from firing.
-    // We'll emulate the Obj-c messaging nil behavior by setting the return value to nil in `forwardInvocation:`, but we'll assume that the return value is `sizeof(void *)`.
-    // Other libraries handle this situation by making use of a global method signature cache, but that seems heavier than necessary and has issues as well.
-    // See https://www.mikeash.com/pyblog/friday-qa-2010-02-26-futures.html and https://github.com/steipete/PSTDelegateProxy/issues/1 for examples of using a method signature cache.
-    return [NSObject instanceMethodSignatureForSelector:@selector(init)];
-}
-
 
 @end
-
 
 
 @implementation NSStream (SafeDelegate)
 - (void)sr_setSafeDelegate:(id<NSStreamDelegate>)delegate
 {
     static char kKeepDelegateAlive;
-    id<NSStreamDelegate> safeDelegate = [SRWeakProxy weakProxyForObject:delegate];
+    SRNSStreamSafeDelegate* safeDelegate = [[SRNSStreamSafeDelegate alloc] initWithDelegate:delegate];
     objc_setAssociatedObject(self, &kKeepDelegateAlive, safeDelegate, OBJC_ASSOCIATION_RETAIN);
     self.delegate = safeDelegate;
 }
