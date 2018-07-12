@@ -330,8 +330,8 @@ NSString *const SRHTTPResponseErrorKey = @"HTTPResponseStatusCode";
         _outputStream = writeStream;
         _inputStream = readStream;
 
-        _inputStream.delegate = self;
-        _outputStream.delegate = self;
+        [_inputStream sr_setSafeDelegate:self];
+        [_outputStream sr_setSafeDelegate:self];
         [self _updateSecureStreamOptions];
 
         if (!_scheduledRunloops.count) {

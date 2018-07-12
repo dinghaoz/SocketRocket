@@ -23,4 +23,9 @@ typedef void(^SRProxyConnectCompletion)(NSError *_Nullable error,
 
 @end
 
+
+@interface NSStream (SafeDelegate)
+- (void)sr_setSafeDelegate:(id<NSStreamDelegate>)delegate;
+@end
+
 NS_ASSUME_NONNULL_END
